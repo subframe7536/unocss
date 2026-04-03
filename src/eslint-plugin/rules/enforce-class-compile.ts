@@ -1,12 +1,13 @@
-import { createRule } from './_'
+import type { Context } from '@oxlint/plugins'
+import { defineRule } from './_'
 
-export default createRule<[{ prefix: string, enableFix: boolean }], 'missing'>({
-  name: 'enforce-class-compile',
+export default defineRule({
   meta: {
     type: 'problem',
     fixable: 'code',
     docs: {
       description: 'Enforce class compilation',
+      url: 'https://unocss.dev/integrations/eslint#rules',
     },
     messages: {
       missing: 'prefix: `{{prefix}}` is missing',
@@ -25,9 +26,9 @@ export default createRule<[{ prefix: string, enableFix: boolean }], 'missing'>({
     }],
     defaultOptions: [{ prefix: ':uno:', enableFix: true }],
   },
-  create(context: any, [mergedOptions]: any) {
-    const CLASS_COMPILE_PREFIX = `${mergedOptions.prefix} `
-    const ENABLE_FIX = mergedOptions.enableFix
+  createOnce(context: Context) {
+    const [{ prefix = ':uno:', enableFix = true } = {}] = context.options as [{ prefix?: string, enableFix?: boolean }?]
+    const CLASS_COMPILE_PREFIX = `${prefix} `
 
     function report({ node, fix }: { node: any, fix: (fixer: any) => any }) {
       context.report({
@@ -35,8 +36,8 @@ export default createRule<[{ prefix: string, enableFix: boolean }], 'missing'>({
         loc: node.loc,
         messageId: 'missing',
         data: { prefix: CLASS_COMPILE_PREFIX.trim() },
-        fix: (...args: any[]) => ENABLE_FIX ? fix(...args) : null,
-      })
+        fix: (...args: any[]) => enableFix ? fix(...args) : null,
+      } as any)
     }
 
     const scriptVisitor = {
@@ -108,7 +109,7 @@ export default createRule<[{ prefix: string, enableFix: boolean }], 'missing'>({
       },
     }
 
-    const parserServices = context?.sourceCode?.parserServices || context.parserServices
+    const parserServices = (context as any)?.sourceCode?.parserServices || (context as any).parserServices
     // @ts-expect-error missing-types
     if (parserServices == null || parserServices.defineTemplateBodyVisitor == null) {
       return scriptVisitor
@@ -120,3 +121,4 @@ export default createRule<[{ prefix: string, enableFix: boolean }], 'missing'>({
     }
   },
 })
+

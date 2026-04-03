@@ -1,14 +1,15 @@
+import type { Context } from '@oxlint/plugins'
 import type { SvelteAttribute, SvelteLiteral, SvelteMustacheTag } from 'svelte-eslint-parser/lib/ast/html'
 import { AST_NODES_WITH_QUOTES, AST_TOKEN_TYPES, CLASS_FIELDS } from '../constants'
-import { createRule, syncAction } from './_'
+import { defineRule, syncAction } from './_'
 
-export default createRule({
-  name: 'order',
+export default defineRule({
   meta: {
     type: 'layout',
     fixable: 'code',
     docs: {
       description: 'Order of UnoCSS utilities in class attribute',
+      url: 'https://unocss.dev/integrations/eslint#rules',
     },
     messages: {
       'invalid-order': 'UnoCSS utilities are not ordered',
@@ -36,7 +37,10 @@ export default createRule({
       },
     ],
   },
-  create(context: any, [{ unoFunctions = ['clsx', 'classnames'], unoVariables = ['^cls', 'classNames?$'] }]: any) {
+  createOnce(context: Context) {
+    const [opts = {}] = context.options as [{ unoFunctions?: string[], unoVariables?: string[] }?]
+    const { unoFunctions = ['clsx', 'classnames'], unoVariables = ['^cls', 'classNames?$'] } = opts
+
     const lowerFunctions = unoFunctions.map((name: string) => name.toLowerCase())
     function isUnoFunction(name: string) {
       return lowerFunctions.includes(name.toLowerCase())
@@ -47,12 +51,12 @@ export default createRule({
       return unoVariablesRegexes.some((reg: RegExp) => reg.test(name))
     }
 
-    function checkLiteral(node: any | SvelteLiteral, addSpace?: 'before' | 'after' | undefined) {
+    function checkLiteral(node: any | SvelteLiteral, addSpace?: 'before' | 'after') {
       if (typeof node.value !== 'string' || !node.value.trim())
         return
       const input = node.value
       let sorted = syncAction(
-        context.settings?.unocss?.configPath,
+        (context as any).settings?.unocss?.configPath,
         'sort',
         input,
         context.filename,
@@ -78,7 +82,7 @@ export default createRule({
             else
               return fixer.replaceText(nodeOrToken, sorted)
           },
-        })
+        } as any)
       }
     }
 
@@ -88,7 +92,7 @@ export default createRule({
         return
 
       const getRange = () => {
-        const text = context.sourceCode.getText(quasi)
+        const text = (context as any).sourceCode.getText(quasi)
         const raw = quasi.value.raw
         if (!text.includes(raw))
           return
@@ -104,7 +108,7 @@ export default createRule({
         return
 
       let sorted = syncAction(
-        context.settings?.unocss?.configPath,
+        (context as any).settings?.unocss?.configPath,
         'sort',
         input,
         context.filename,
@@ -125,7 +129,7 @@ export default createRule({
               return null
             return fixer.replaceTextRange(realRange, sorted)
           },
-        })
+        } as any)
       }
     }
 
@@ -270,7 +274,6 @@ export default createRule({
           return checkPossibleLiteral(node.init)
         }
 
-        // Handle TypeScript `as` expressions (TSAsExpression)
         if (node.init.type === 'TSAsExpression' && isPossibleLiteral(node.init.expression)) {
           return checkPossibleLiteral(node.init.expression)
         }
@@ -307,7 +310,7 @@ export default createRule({
       },
     }
 
-    const parserServices = context?.sourceCode?.parserServices || context.parserServices
+    const parserServices = (context as any)?.sourceCode?.parserServices || (context as any).parserServices
     // @ts-expect-error missing-types
     if (parserServices == null || parserServices.defineTemplateBodyVisitor == null) {
       return scriptVisitor
@@ -319,3 +322,4 @@ export default createRule({
     }
   },
 })
+

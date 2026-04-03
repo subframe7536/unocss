@@ -1,15 +1,16 @@
+import type { Context } from '@oxlint/plugins'
 import MagicString from 'magic-string'
-import { createRule, syncAction } from './_'
+import { defineRule, syncAction } from './_'
 
 export const IGNORE_ATTRIBUTES = ['style', 'class', 'classname', 'value']
 
-export default createRule({
-  name: 'order-attributify',
+export default defineRule({
   meta: {
     type: 'layout',
     fixable: 'code',
     docs: {
       description: 'Order of UnoCSS attributes',
+      url: 'https://unocss.dev/integrations/eslint#rules',
     },
     messages: {
       'invalid-order': 'UnoCSS attributes are not ordered',
@@ -17,7 +18,7 @@ export default createRule({
     schema: [],
     defaultOptions: [],
   },
-  create(context: any) {
+  createOnce(context: Context) {
     const scriptVisitor = {}
 
     const templateBodyVisitor = {
@@ -32,7 +33,7 @@ export default createRule({
 
         const input = valueless.map((i: any) => i.key.name).join(' ').trim()
         const sorted = syncAction(
-          context.settings?.unocss?.configPath,
+          (context as any).settings?.unocss?.configPath,
           'sort',
           input,
           context.filename,
@@ -43,7 +44,7 @@ export default createRule({
             messageId: 'invalid-order',
             fix(fixer: any) {
               const offset = node.range[0]
-              const code = context.sourceCode.getText().slice(node.range[0], node.range[1])
+              const code = (context as any).sourceCode.getText().slice(node.range[0], node.range[1])
 
               const s = new MagicString(code)
 
@@ -58,12 +59,12 @@ export default createRule({
 
               return fixer.replaceText(node, s.toString())
             },
-          })
+          } as any)
         }
       },
     }
 
-    const parserServices = context?.sourceCode?.parserServices || context.parserServices
+    const parserServices = (context as any)?.sourceCode?.parserServices || (context as any).parserServices
     // @ts-expect-error missing types
     if (parserServices == null || parserServices.defineTemplateBodyVisitor == null) {
       return scriptVisitor
@@ -75,3 +76,4 @@ export default createRule({
     }
   },
 })
+

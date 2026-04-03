@@ -1,14 +1,15 @@
+import type { Context } from '@oxlint/plugins'
 import { CLASS_FIELDS } from '../constants'
-import { createRule, syncAction } from './_'
+import { defineRule, syncAction } from './_'
 import { IGNORE_ATTRIBUTES } from './order-attributify'
 
-export default createRule({
-  name: 'blocklist',
+export default defineRule({
   meta: {
     type: 'problem',
     fixable: 'code',
     docs: {
       description: 'Utilities in UnoCSS blocklist',
+      url: 'https://unocss.dev/integrations/eslint#rules',
     },
     messages: {
       'in-blocklist': '"{{name}}" is in blocklist{{reason}}',
@@ -16,14 +17,14 @@ export default createRule({
     schema: [],
     defaultOptions: [],
   },
-  create(context: any) {
+  createOnce(context: Context) {
     const checkLiteral = (node: any) => {
       if (typeof node.value !== 'string' || !node.value.trim())
         return
       const input = node.value
 
       const blocked = syncAction(
-        context.settings?.unocss?.configPath,
+        (context as any).settings?.unocss?.configPath,
         'blocklist',
         input,
         context.filename,
@@ -32,11 +33,8 @@ export default createRule({
         context.report({
           node,
           messageId: 'in-blocklist',
-          data: {
-            name,
-            reason: meta?.message ? `: ${meta.message}` : '',
-          },
-        })
+          data: { name, reason: meta?.message ? `: ${meta.message}` : '' },
+        } as any)
       })
     }
 
@@ -76,7 +74,7 @@ export default createRule({
           if (!node?.key?.name)
             continue
           const blocked = syncAction(
-            context.settings?.unocss?.configPath,
+            (context as any).settings?.unocss?.configPath,
             'blocklist',
             node.key.name,
             context.filename,
@@ -85,17 +83,14 @@ export default createRule({
             context.report({
               node,
               messageId: 'in-blocklist',
-              data: {
-                name,
-                reason: meta?.message ? `: ${meta.message}` : '',
-              },
-            })
+              data: { name, reason: meta?.message ? `: ${meta.message}` : '' },
+            } as any)
           })
         }
       },
     }
 
-    const parserServices = context?.sourceCode?.parserServices || context.parserServices
+    const parserServices = (context as any)?.sourceCode?.parserServices || (context as any).parserServices
     // @ts-expect-error missing-types
     if (parserServices == null || parserServices.defineTemplateBodyVisitor == null) {
       return scriptVisitor
@@ -107,3 +102,4 @@ export default createRule({
     }
   },
 })
+
