@@ -31,7 +31,8 @@ export default defineConfig([
     dts: true,
     exports: true,
   },
-  // Vite plugin entry: @unocss/vite is bundled (not external), inspector is stripped
+  // Vite plugin entry: @unocss/vite is bundled (not external), inspector is stripped.
+  // All of @unocss/vite's sub-deps are in our `dependencies` and thus auto-external.
   {
     entry: {
       vite: 'src/vite.ts',
@@ -39,11 +40,6 @@ export default defineConfig([
     format: 'esm',
     dts: true,
     exports: true,
-    deps: {
-      // @unocss/vite (devDep) is the only intentionally-bundled dep; its transitive
-      // sub-deps are bundled too — use false to suppress the sub-dep bundle warnings.
-      onlyBundle: false,
-    },
     hash: false,
     plugins: [patchInspectorPlugin],
   },
@@ -55,6 +51,12 @@ export default defineConfig([
     format: 'esm',
     dts: true,
     exports: true,
+    deps: {
+      // `eslint` is a type-only import (for Linter/Rule types in types.ts); mark it
+      // external so @types/eslint and its transitive type deps stay out of the DTS
+      // bundle and out of inlinedDependencies.
+      neverBundle: ['eslint'],
+    },
   },
   // Worker entry (always ESM, separate bundle, internal use)
   {

@@ -33,6 +33,7 @@
     "release": "bun run build && bumpp"
   },
   "dependencies": {
+    "@jridgewell/remapping": "^2.3.5",
     "@oxlint/plugins": "^1.58.0",
     "@unocss/config": "^66.0.0",
     "@unocss/core": "^66.0.0",
@@ -41,8 +42,12 @@
     "@unocss/preset-wind3": "^66.0.0",
     "@unocss/transformer-directives": "^66.0.0",
     "@unocss/transformer-variant-group": "^66.0.0",
+    "chokidar": "^5.0.0",
     "magic-string": "^0.30.0",
-    "synckit": "^0.9.0"
+    "pathe": "^2.0.3",
+    "synckit": "^0.9.0",
+    "tinyglobby": "^0.2.15",
+    "unplugin-utils": "^0.3.1"
   },
   "peerDependencies": {
     "vite": "^5 || ^6 || ^7 || ^8"
@@ -72,21 +77,6 @@
     "./package.json": "./package.json"
   },
   "inlinedDependencies": {
-    "@jridgewell/gen-mapping": "0.3.13",
-    "@jridgewell/remapping": "2.3.5",
-    "@jridgewell/resolve-uri": "3.1.2",
-    "@jridgewell/sourcemap-codec": "1.5.5",
-    "@jridgewell/trace-mapping": "0.3.31",
-    "@types/eslint": "9.6.1",
-    "@types/estree": "1.0.8",
-    "@types/json-schema": "7.0.15",
-    "@unocss/vite": "66.6.7",
-    "chokidar": "5.0.0",
-    "fdir": "6.5.0",
-    "pathe": "2.0.3",
-    "picomatch": "4.0.4",
-    "readdirp": "5.0.0",
-    "tinyglobby": "0.2.15",
-    "unplugin-utils": "0.3.1"
+    "@unocss/vite": "66.6.7"
   }
 }
