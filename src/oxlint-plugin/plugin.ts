@@ -18,4 +18,4 @@ const oxlintPlugin = definePlugin({
  * ESLint-compatible plugin.
  * `eslintCompatPlugin` adds ESLint `create` methods for rules that use `createOnce`.
  */
-export const plugin = eslintCompatPlugin(oxlintPlugin) as any
+export const plugin = eslintCompatPlugin(oxlintPlugin)

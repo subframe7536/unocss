@@ -1,25 +1,24 @@
 import { defineConfig } from 'tsdown'
 
 /**
- * Tsdown plugin that stubs out `@unocss/inspector` at build time.
- * The inspector code path in @unocss/vite checks `if (inlineConfig.inspector !== false)` before
- * calling `UnocssInspector(ctx)`. Our stub returns null, which is filtered out by the vite
- * plugin's `return plugins.filter(Boolean)` call at the end.
+ * Rolldown plugin that patches `@unocss/vite` at build time to strip out all
+ * inspector-related code.  Uses a `transform` hook rather than a module stub
+ * so that the inspector import and the runtime conditional are both removed from
+ * the bundled output.
  */
-function stubInspectorPlugin() {
-  return {
-    name: 'stub-unocss-inspector',
-    resolveId(id: string) {
-      if (id === '@unocss/inspector')
-        return '\0@unocss/inspector'
+const patchInspectorPlugin = {
+  name: 'patch-unocss-inspector',
+  transform(code: string, id: string) {
+    if (!id.includes('@unocss/vite'))
       return null
-    },
-    load(id: string) {
-      if (id === '\0@unocss/inspector')
-        return 'export default function UnocssInspector() { return null }'
-      return null
-    },
-  }
+    return {
+      code: code
+        // Remove the inspector default import
+        .replace(/import UnocssInspector from ['"]@unocss\/inspector['"];?[\r\n]*/g, '')
+        // Remove the runtime push: if (inlineConfig.inspector !== false) plugins.push(UnocssInspector(ctx));
+        .replace(/if\s*\(inlineConfig\.inspector\s*!==\s*false\)\s*plugins\.push\(UnocssInspector\(ctx\)\);?[\r\n]*/g, ''),
+    }
+  },
 }
 
 export default defineConfig([
@@ -60,12 +59,12 @@ export default defineConfig([
     },
     // Use deterministic chunk names (no hash) so output is stable
     hash: false,
-    plugins: [stubInspectorPlugin()],
+    plugins: [patchInspectorPlugin],
   },
   // Oxlint plugin entry: ESM-only, @oxlint/plugins is bundled (not external)
   {
     entry: {
-      'oxlint-plugin': 'src/eslint-plugin/index.ts',
+      'oxlint-plugin': 'src/oxlint-plugin/index.ts',
     },
     format: 'esm',
     dts: true,
@@ -83,7 +82,7 @@ export default defineConfig([
   // Worker entry (always ESM, separate bundle, internal use)
   {
     entry: {
-      worker: 'src/eslint-plugin/worker.ts',
+      worker: 'src/oxlint-plugin/worker.ts',
     },
     format: 'esm',
     dts: false,

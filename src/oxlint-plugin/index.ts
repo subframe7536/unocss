@@ -1,4 +1,4 @@
-import type { UnoCSSEslintConfigs, UnoCSSEslintPluginModule } from './types'
+import type { UnoCSSEslintConfigs } from './types'
 import configsFlat from './configs/flat'
 import configsRecommended from './configs/recommended'
 import { plugin } from './plugin'
@@ -17,9 +17,7 @@ export const configs: UnoCSSEslintConfigs = {
   flat: configsFlat,
 }
 
-const eslintPlugin: UnoCSSEslintPluginModule = {
+export default {
   ...plugin,
   configs,
 }
-
-export default eslintPlugin
