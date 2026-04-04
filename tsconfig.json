@@ -1,0 +1,3 @@
+{
+  "extends": "@subf/config/tsconfig-lib"
+}
