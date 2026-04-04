@@ -13,7 +13,7 @@ A focused subset of [UnoCSS](https://unocss.dev) bundled into a single package.
 | `@unocss/transformer-variant-group` | Variant group transformer |
 | `@unocss/transformer-directives` | `@apply` directive transformer |
 | `@unocss/vite` | Vite plugin (**inspector disabled**) |
-| eslint-plugin | ESLint rules (**no `@typescript-eslint/utils`**, oxlint-optimized) |
+| oxlint-plugin | ESLint/oxlint rules (**no `@typescript-eslint/utils`**, oxlint-optimized) |
 
 ## Install
 
@@ -56,14 +56,24 @@ export default {
 }
 ```
 
-### ESLint Plugin
+### Oxlint Plugin
 
-Drop-in replacement for `@unocss/eslint-plugin` without the `@typescript-eslint/utils` dependency.
-Compatible with both [ESLint](https://eslint.org) flat config and [oxlint](https://oxc.rs/docs/guide/usage/linter) JS plugins.
+Compatible with [oxlint](https://oxc.rs/docs/guide/usage/linter) JS plugins and [ESLint](https://eslint.org) flat config.
+
+```ts
+// oxlint.config.ts
+import { defineConfig } from 'oxlint'
+
+export default defineConfig({
+  jsPlugins: ['@subf/unocss/oxlint-plugin'],
+})
+```
+
+Or with ESLint flat config:
 
 ```js
 // eslint.config.js
-import unocss from '@subf/unocss/eslint-plugin'
+import unocss from '@subf/unocss/oxlint-plugin'
 
 export default [
   unocss.configs.flat,

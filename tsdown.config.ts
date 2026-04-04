@@ -30,14 +30,17 @@ export default defineConfig([
     },
     format: 'esm',
     dts: true,
-    external: [
-      '@unocss/core',
-      '@unocss/preset-wind3',
-      '@unocss/preset-icons',
-      '@unocss/preset-web-fonts',
-      '@unocss/transformer-directives',
-      '@unocss/transformer-variant-group',
-    ],
+    exports: true,
+    deps: {
+      neverBundle: [
+        '@unocss/core',
+        '@unocss/preset-wind3',
+        '@unocss/preset-icons',
+        '@unocss/preset-web-fonts',
+        '@unocss/transformer-directives',
+        '@unocss/transformer-variant-group',
+      ],
+    },
   },
   // Vite plugin entry: @unocss/vite is bundled (not external), inspector is stubbed
   {
@@ -46,43 +49,53 @@ export default defineConfig([
     },
     format: 'esm',
     dts: true,
+    exports: true,
     // Only externalize true peer/runtime dependencies; bundle @unocss/vite and its sub-deps
-    external: [
-      '@unocss/core',
-      '@unocss/config',
-      'vite',
-    ],
+    deps: {
+      neverBundle: [
+        '@unocss/core',
+        '@unocss/config',
+        'vite',
+      ],
+    },
     // Use deterministic chunk names (no hash) so output is stable
     hash: false,
     plugins: [stubInspectorPlugin()],
   },
-  // ESLint plugin entry: @oxlint/plugins is bundled (not external)
+  // Oxlint plugin entry: ESM-only, @oxlint/plugins is bundled (not external)
   {
     entry: {
-      'eslint-plugin': 'src/eslint-plugin/index.ts',
+      'oxlint-plugin': 'src/eslint-plugin/index.ts',
     },
-    format: ['esm', 'cjs'],
+    format: 'esm',
     dts: true,
-    external: [
-      'eslint',
-      '@unocss/config',
-      '@unocss/core',
-      'synckit',
-      'magic-string',
-    ],
+    exports: true,
+    deps: {
+      neverBundle: [
+        'eslint',
+        '@unocss/config',
+        '@unocss/core',
+        'synckit',
+        'magic-string',
+      ],
+    },
   },
-  // Worker entry (always ESM, separate bundle)
+  // Worker entry (always ESM, separate bundle, internal use)
   {
     entry: {
       worker: 'src/eslint-plugin/worker.ts',
     },
     format: 'esm',
     dts: false,
-    external: [
-      '@unocss/config',
-      '@unocss/core',
-      'synckit',
-    ],
+    exports: true,
+    deps: {
+      neverBundle: [
+        '@unocss/config',
+        '@unocss/core',
+        'synckit',
+      ],
+    },
   },
 ])
+
 
