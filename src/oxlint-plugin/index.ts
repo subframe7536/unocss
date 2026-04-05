@@ -1,23 +1,20 @@
-import type { UnoCSSEslintConfigs } from './types'
-import configsFlat from './configs/flat'
-import configsRecommended from './configs/recommended'
-import { plugin } from './plugin'
-import './types'
+import { definePlugin, eslintCompatPlugin } from '@oxlint/plugins'
 
-export type {
-  UnoCSSEslintConfigs,
-  UnoCSSEslintFlatConfig,
-  UnoCSSEslintPlugin,
-  UnoCSSEslintPluginModule,
-  UnoCSSEslintRecommendedConfig,
-} from './types'
+import blocklist from './rules/blocklist'
+import order from './rules/order'
 
-export const configs: UnoCSSEslintConfigs = {
-  recommended: configsRecommended,
-  flat: configsFlat,
-}
+const oxlintPlugin = definePlugin({
+  meta: { name: 'unocss' },
+  rules: {
+    order,
+    blocklist,
+  },
+})
 
-export default {
-  ...plugin,
-  configs,
-}
+/**
+ * ESLint-compatible plugin.
+ * `eslintCompatPlugin` adds ESLint `create` methods for rules that use `createOnce`.
+ */
+const plugin = eslintCompatPlugin(oxlintPlugin)
+
+export default plugin

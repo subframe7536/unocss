@@ -1,9 +1,8 @@
-import type { run } from '../worker'
 import { join } from 'node:path'
-import { defineRule } from '@oxlint/plugins'
+import { fileURLToPath } from 'node:url'
+
 import { createSyncFn } from 'synckit'
-import { distDir } from '../dirs'
 
-export const syncAction = createSyncFn(join(distDir, 'worker.mjs')) as typeof run
-
-export { defineRule }
+export const syncAction = createSyncFn(
+  join(fileURLToPath(new URL('.', import.meta.url)), 'worker.mjs'),
+)

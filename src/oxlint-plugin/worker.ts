@@ -1,7 +1,8 @@
-import type { BlocklistMeta, UnoGenerator } from '@unocss/core'
 import { dirname } from 'node:path'
 import process from 'node:process'
+
 import { loadConfig } from '@unocss/config'
+import type { BlocklistMeta, UnoGenerator } from '@unocss/core'
 import { collapseVariantGroup, createGenerator, parseVariantGroup } from '@unocss/core'
 import { runAsWorker } from 'synckit'
 
@@ -23,18 +24,14 @@ function getSearchCwd(id: string): string {
 }
 
 async function _getGenerator(configPath?: string, id?: string) {
-  const searchFrom = configPath
-    ? process.cwd()
-    : id
-      ? getSearchCwd(id)
-      : process.cwd()
+  const searchFrom = configPath ? process.cwd() : id ? getSearchCwd(id) : process.cwd()
 
-  const { config, sources } = await loadConfig(
-    searchFrom,
-    configPath,
-  )
-  if (!sources.length)
-    throw new Error('[@subf/unocss] No config file found, create a `uno.config.ts` file in your project root and try again.')
+  const { config, sources } = await loadConfig(searchFrom, configPath)
+  if (!sources.length) {
+    throw new Error(
+      '[@subf/unocss] No config file found, create a `uno.config.ts` file in your project root and try again.',
+    )
+  }
   return createGenerator({
     ...config,
     warn: false,
@@ -42,10 +39,12 @@ async function _getGenerator(configPath?: string, id?: string) {
 }
 
 function getCacheKey(configPath?: string, id?: string): string {
-  if (configPath)
+  if (configPath) {
     return `config:${configPath}`
-  if (id)
+  }
+  if (id) {
     return `dir:${getSearchCwd(id)}`
+  }
   return `cwd:${process.cwd()}`
 }
 
@@ -59,7 +58,10 @@ export async function getGenerator(configPath?: string, id?: string) {
   return await promise
 }
 
-export function setGenerator(generator: Awaited<UnoGenerator<any>>, configPath?: string | undefined) {
+export function setGenerator(
+  generator: Awaited<UnoGenerator<any>>,
+  configPath?: string | undefined,
+) {
   const cacheKey = configPath ? `config:${configPath}` : `cwd:${process.cwd()}`
   promises.set(cacheKey, Promise.resolve(generator))
 }
@@ -71,8 +73,9 @@ export function setGenerator(generator: Awaited<UnoGenerator<any>>, configPath?:
 async function sortRules(rules: string, uno: UnoGenerator<any>): Promise<string> {
   const unknown: string[] = []
 
-  if (!uno.config.details)
+  if (!uno.config.details) {
     uno.config.details = true
+  }
 
   const expandedResult = parseVariantGroup(rules)
   rules = expandedResult.expanded
@@ -80,29 +83,31 @@ async function sortRules(rules: string, uno: UnoGenerator<any>): Promise<string>
   const result: Array<[number, string] | undefined> = []
   const arr = rules.split(/\s+/g)
   for (const i of arr) {
-    if (!i)
+    if (!i) {
       continue
+    }
     const token = await uno.parseToken(i)
-    if (token == null) {
+    if (!token) {
       unknown.push(i)
       result.push(undefined)
       continue
     }
-    const variantRank = (token[0][5]?.variantHandlers?.length || 0) * 100_000
-    const order = token[0][0] + variantRank
+    const variantRank = (token[0]?.[5]?.variantHandlers?.length || 0) * 100_000
+    const order = (token[0]?.[0] ?? 0) + variantRank
     result.push([order, i])
   }
 
-  let sorted = (result.filter(x => x != null) as [number, string][])
+  let sorted = (result.filter((x) => x !== null) as [number, string][])
     .sort((a, b) => {
       const diff = a[0] - b[0]
       return diff !== 0 ? diff : a[1].localeCompare(b[1])
     })
-    .map(i => i[1])
+    .map((i) => i[1])
     .join(' ')
 
-  if (expandedResult?.prefixes.length)
+  if (expandedResult?.prefixes.length) {
     sorted = collapseVariantGroup(sorted, expandedResult.prefixes)
+  }
 
   return [...unknown, sorted].join(' ').trim()
 }
@@ -111,7 +116,11 @@ async function actionSort(configPath: string | undefined, classes: string, id?: 
   return await sortRules(classes, await getGenerator(configPath, id))
 }
 
-async function actionBlocklist(configPath: string | undefined, classes: string, id?: string): Promise<[string, BlocklistMeta | undefined][]> {
+async function actionBlocklist(
+  configPath: string | undefined,
+  classes: string,
+  id?: string,
+): Promise<[string, BlocklistMeta | undefined][]> {
   const uno = await getGenerator(configPath, id)
   const blocked = new Map<string, BlocklistMeta | undefined>()
 
@@ -128,22 +137,25 @@ async function actionBlocklist(configPath: string | undefined, classes: string, 
   }
 
   const matchBlocked = async (raw: string) => {
-    if (blocked.has(raw))
+    if (blocked.has(raw)) {
       return
+    }
     const rule = uno.getBlocked(raw)
     if (rule) {
       blocked.set(raw, getMeta(raw, rule[1]))
       return
     }
     let current = raw
-    for (const p of uno.config.preprocess)
+    for (const p of uno.config.preprocess) {
       current = p(raw)!
+    }
     const results = await uno.matchVariants(raw, current)
-    const rules = results.map(r => r && uno.getBlocked(r[1]))
+    const rules = results.map((r) => r && uno.getBlocked(r[1]))
 
     for (const rule of rules) {
-      if (rule)
+      if (rule) {
         blocked.set(raw, getMeta(raw, rule[1]))
+      }
     }
   }
 
@@ -152,9 +164,23 @@ async function actionBlocklist(configPath: string | undefined, classes: string, 
   return [...blocked]
 }
 
-export function runAsync(configPath: string | undefined, action: 'sort', classes: string, id?: string): Promise<string>
-export function runAsync(configPath: string | undefined, action: 'blocklist', classes: string, id?: string): Promise<[string, BlocklistMeta | undefined][]>
-export async function runAsync(configPath: string | undefined, action: string, ...args: any[]): Promise<any> {
+export function runAsync(
+  configPath: string | undefined,
+  action: 'sort',
+  classes: string,
+  id?: string,
+): Promise<string>
+export function runAsync(
+  configPath: string | undefined,
+  action: 'blocklist',
+  classes: string,
+  id?: string,
+): Promise<[string, BlocklistMeta | undefined][]>
+export async function runAsync(
+  configPath: string | undefined,
+  action: string,
+  ...args: any[]
+): Promise<any> {
   switch (action) {
     case 'sort':
       // @ts-expect-error cast
@@ -165,8 +191,18 @@ export async function runAsync(configPath: string | undefined, action: string, .
   }
 }
 
-export function run(configPath: string | undefined, action: 'sort', classes: string, id?: string): string
-export function run(configPath: string | undefined, action: 'blocklist', classes: string, id?: string): [string, BlocklistMeta | undefined][]
+export function run(
+  configPath: string | undefined,
+  action: 'sort',
+  classes: string,
+  id?: string,
+): string
+export function run(
+  configPath: string | undefined,
+  action: 'blocklist',
+  classes: string,
+  id?: string,
+): [string, BlocklistMeta | undefined][]
 export function run(configPath: string | undefined, action: string, ...args: any[]): any {
   // @ts-expect-error cast
   return runAsync(configPath, action, ...args)

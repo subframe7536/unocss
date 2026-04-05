@@ -12,10 +12,18 @@ const patchInspectorPlugin = {
     handler(code: string) {
       return {
         code: code
+          // Replace the `createFilter` import from Vite's version instead of unplugin-utils
+          .replace(
+            /import { createFilter } from ['"]unplugin-utils['"];/g,
+            'import { createFilter } from "vite";',
+          )
           // Remove the inspector default import
           .replace(/import UnocssInspector from ['"]@unocss\/inspector['"];?[\r\n]*/g, '')
           // Remove the runtime push: if (inlineConfig.inspector !== false) plugins.push(UnocssInspector(ctx));
-          .replace(/if\s*\(inlineConfig\.inspector\s*!==\s*false\)\s*plugins\.push\(UnocssInspector\(ctx\)\);?[\r\n]*/g, ''),
+          .replace(
+            /if\s*\(inlineConfig\.inspector\s*!==\s*false\)\s*plugins\.push\(UnocssInspector\(ctx\)\);?[\r\n]*/g,
+            '',
+          ),
       }
     },
   },
@@ -51,12 +59,6 @@ export default defineConfig([
     format: 'esm',
     dts: true,
     exports: true,
-    deps: {
-      // `eslint` is a type-only import (for Linter/Rule types in types.ts); mark it
-      // external so @types/eslint and its transitive type deps stay out of the DTS
-      // bundle and out of inlinedDependencies.
-      neverBundle: ['eslint'],
-    },
   },
   // Worker entry (always ESM, separate bundle, internal use)
   {
@@ -68,5 +70,3 @@ export default defineConfig([
     exports: true,
   },
 ])
-
-
