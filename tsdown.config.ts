@@ -25,7 +25,23 @@ const patchInspectorPlugin = {
           .replace(
             /if\s*\(inlineConfig\.inspector\s*!==\s*false\)\s*plugins\.push\(UnocssInspector\(ctx\)\);?[\r\n]*/g,
             '',
-          ),
+          ) // Remove Vue files from the default pipeline include to avoid Vue/Svelte-specific handling
+          .replace(
+            /const defaultPipelineInclude = \[[\s\S]*?\];/g,
+            'const defaultPipelineInclude = [/\\.([jt]sx|vine.ts|mdx?|astro|elm|php|phtml|marko|html)($|\\?)/];',
+          )
+          // Disable vue-scoped mode registration
+          .replace(
+            /else if \(mode === "vue-scoped"\) plugins\.push\(VueScopedPlugin\(ctx\)\);/g,
+            'else if (mode === "vue-scoped") throw new Error("[@subf/unocss] vue-scoped mode removed");',
+          )
+          // Disable shadow-dom mode registration
+          .replace(
+            /else if \(mode === "shadow-dom"\) plugins\.push\(ShadowDomModuleModePlugin\(ctx\)\);/g,
+            'else if (mode === "shadow-dom") throw new Error("[@subf/unocss] shadow-dom mode removed");',
+          )
+          // Remove VueScopedPlugin from the final export list
+          .replace(/,\s*VueScopedPlugin/g, ''),
       }
     },
   },

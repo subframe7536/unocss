@@ -2,6 +2,8 @@
 
 A focused subset of [UnoCSS](https://unocss.dev) bundled into a single package.
 
+If you are using `vue` or `svelte`, you don't need this package.
+
 ## Included
 
 | Package                             | Description                                      |
@@ -13,8 +15,8 @@ A focused subset of [UnoCSS](https://unocss.dev) bundled into a single package.
 | `@unocss/preset-web-fonts`          | Web fonts support                                |
 | `@unocss/transformer-variant-group` | Variant group transformer                        |
 | `@unocss/transformer-directives`    | `@apply` directive transformer                   |
-| `unocss-preset-completion`          | Autocompletion support for UnoCSS classes        |
-| `@subf/unocss/vite`                 | Vite plugin (**inspector disabled**)             |
+| `unocss-preset-completion`          | Auto completion support for UnoCSS classes       |
+| `@subf/unocss/vite`                 | Vite plugin, remove inspector                    |
 | `@subf/unocss/oxlint-plugin`        | oxlint rules, `order` and `blocklist` rules only |
 
 ## Install
