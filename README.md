@@ -2,7 +2,7 @@
 
 A focused subset of [UnoCSS](https://unocss.dev) bundled into a single package.
 
-If you are using `vue` or `svelte`, you don't need this package.
+If you are using `vue` or `svelte`, you should use `unocss` directly.
 
 ## Included
 
