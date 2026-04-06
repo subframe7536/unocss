@@ -46,9 +46,11 @@
     "lint": "oxlint --fix",
     "fmt": "oxfmt",
     "qa": "bun run typecheck && oxlint --fix && oxfmt",
+    "test": "node --test",
     "release": "bun run build && bumpp"
   },
   "dependencies": {
+    "@oxlint/plugins": "^1.58.0",
     "@unocss/config": "^66.0.0",
     "@unocss/core": "^66.0.0",
     "@unocss/preset-icons": "^66.0.0",
@@ -64,7 +66,6 @@
     "unocss-preset-completion": "^0.3.1"
   },
   "devDependencies": {
-    "@oxlint/plugins": "^1.58.0",
     "@subf/config": "^0.1.1",
     "@types/node": "^22",
     "@unocss/vite": "^66.0.0",
@@ -84,7 +85,6 @@
     "@unocss/inspector": "npm:has-flag"
   },
   "inlinedDependencies": {
-    "@oxlint/plugins": "1.58.0",
     "@unocss/vite": "66.6.7"
   }
 }

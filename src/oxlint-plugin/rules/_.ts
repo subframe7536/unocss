@@ -5,11 +5,15 @@ import type { Context, ESTree } from '@oxlint/plugins'
 import type { BlocklistMeta } from '@unocss/core'
 import { createSyncFn } from 'synckit'
 
-export const UNO_FUNCTIONS = ['clsx', 'classnames', 'cn', 'cls']
+export const UNO_FUNCTIONS = ['clsx', 'classnames', 'cn', 'cls', 'cva']
 export const UNO_VARIABLES = ['^cls', 'classNames?$']
 export const CLASS_FIELDS = ['class', 'className', 'classList']
 
-const syncAction = createSyncFn(join(fileURLToPath(new URL('.', import.meta.url)), 'worker.mjs'))
+const syncAction = createSyncFn(
+  process.env.NODE_ENV === 'production'
+    ? join(fileURLToPath(new URL('.', import.meta.url)), 'worker.mjs')
+    : join(fileURLToPath(new URL('..', import.meta.url)), 'worker.ts'),
+)
 export function sortClasses(context: Context, classes: string, id?: string): string {
   return syncAction(
     'sort',

@@ -48,8 +48,8 @@ export default defineConfig([
     },
     format: 'esm',
     dts: true,
-    deps: {
-      onlyBundle: false,
+    define: {
+      'process.env.NODE_ENV': JSON.stringify('production'),
     },
     exports: true,
   },

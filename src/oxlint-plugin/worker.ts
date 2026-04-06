@@ -94,7 +94,7 @@ async function actionSort(
     result.push([order, i])
   }
 
-  let sorted = (result.filter((x) => x !== null) as [number, string][])
+  let sorted = (result.filter(Boolean) as [number, string][])
     .sort((a, b) => {
       const diff = a[0] - b[0]
       return diff !== 0 ? diff : a[1].localeCompare(b[1])

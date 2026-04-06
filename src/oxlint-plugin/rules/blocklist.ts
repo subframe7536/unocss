@@ -1,6 +1,6 @@
 import type { Rule } from '@oxlint/plugins'
 
-import { blocklistClasses, CLASS_FIELDS } from './_'
+import { blocklistClasses, CLASS_FIELDS } from './_.ts'
 
 const rule: Rule = {
   meta: {

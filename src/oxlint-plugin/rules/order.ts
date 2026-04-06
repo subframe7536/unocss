@@ -8,7 +8,7 @@ import {
   CLASS_FIELDS,
   UNO_FUNCTIONS,
   UNO_VARIABLES,
-} from './_'
+} from './_.ts'
 
 const rule: Rule = {
   meta: {
