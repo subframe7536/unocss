@@ -1,6 +1,6 @@
 {
   "name": "@subf/unocss",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A custom subset of UnoCSS packages",
   "keywords": [
     "atomic-css",
