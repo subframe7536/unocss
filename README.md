@@ -1,23 +1,24 @@
 # @subf/unocss
 
-A focused subset of [UnoCSS](https://unocss.dev) bundled into a single package.
+A custom subset of UnoCSS packages.
 
 If you are using `vue` or `svelte`, you should use `unocss` directly.
 
 ## Included
 
-| Package                             | Description                                      |
-| ----------------------------------- | ------------------------------------------------ |
-| `@unocss/core`                      | Core engine                                      |
-| `@unocss/preset-wind3`              | Tailwind v3 preset                               |
-| `@unocss/preset-wind4`              | Tailwind v4 preset                               |
-| `@unocss/preset-icons`              | Pure CSS icons via Iconify                       |
-| `@unocss/preset-web-fonts`          | Web fonts support                                |
-| `@unocss/transformer-variant-group` | Variant group transformer                        |
-| `@unocss/transformer-directives`    | `@apply` directive transformer                   |
-| `unocss-preset-completion`          | Auto completion support for UnoCSS classes       |
-| `@subf/unocss/vite`                 | Vite plugin, remove inspector                    |
-| `@subf/unocss/oxlint-plugin`        | oxlint rules, `order` and `blocklist` rules only |
+| Package                             | Description                                        |
+| ----------------------------------- | -------------------------------------------------- |
+| `@unocss/core`                      | Core engine                                        |
+| `@unocss/preset-wind3`              | Tailwind v3 preset                                 |
+| `@unocss/preset-wind4`              | Tailwind v4 preset                                 |
+| `@unocss/preset-icons`              | Pure CSS icons via Iconify                         |
+| `@unocss/preset-web-fonts`          | Web fonts support                                  |
+| `@unocss/transformer-variant-group` | Variant group transformer                          |
+| `@unocss/transformer-directives`    | `@apply` directive transformer                     |
+| `@unocss/reset`                     | CSS reset styles with `reset-*`, no sanitize entry |
+| `unocss-preset-completion`          | Auto completion support for UnoCSS classes         |
+| `@subf/unocss/vite`                 | Vite plugin, remove inspector                      |
+| `@subf/unocss/oxlint-plugin`        | oxlint rules, `order` and `blocklist` rules only   |
 
 ## Install
 
@@ -57,6 +58,13 @@ import UnoCSS from '@subf/unocss/vite'
 export default {
   plugins: [UnoCSS()],
 }
+```
+
+### Reset
+
+```ts
+import '@subf/unocss/reset-tailwind.css'
+import 'uno.css'
 ```
 
 ### Oxlint Plugin
