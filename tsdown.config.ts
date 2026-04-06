@@ -1,3 +1,5 @@
+import { readdirSync, writeFileSync } from 'node:fs'
+
 import { defineConfig } from 'tsdown'
 
 /**
@@ -37,7 +39,20 @@ export default defineConfig([
     },
     format: 'esm',
     dts: true,
-    exports: true,
+    exports: {
+      customExports(exports) {
+        const dir = './node_modules/@unocss/reset'
+        readdirSync(dir).forEach((file) => {
+          if (file.endsWith('.css')) {
+            const dst = `./dist/reset-${file}`
+            const content = `@import "@unocss/reset/${file}";\n`
+            writeFileSync(dst, content)
+            exports[`./reset-${file}`] = dst
+          }
+        })
+        return exports
+      },
+    },
   },
   // Vite plugin entry: @unocss/vite is bundled (not external), inspector is stripped.
   // All of @unocss/vite's sub-deps are in our `dependencies` and thus auto-external.
@@ -48,7 +63,9 @@ export default defineConfig([
     format: 'esm',
     dts: true,
     exports: true,
-    hash: false,
+    deps: {
+      onlyBundle: false,
+    },
     plugins: [patchInspectorPlugin],
   },
   // Oxlint plugin entry: ESM-only

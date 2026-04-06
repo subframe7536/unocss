@@ -28,7 +28,12 @@
     "./oxlint-plugin": "./dist/oxlint-plugin.mjs",
     "./vite": "./dist/vite.mjs",
     "./worker": "./dist/worker.mjs",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./reset-eric-meyer.css": "./dist/reset-eric-meyer.css",
+    "./reset-normalize.css": "./dist/reset-normalize.css",
+    "./reset-tailwind-compat.css": "./dist/reset-tailwind-compat.css",
+    "./reset-tailwind-v4.css": "./dist/reset-tailwind-v4.css",
+    "./reset-tailwind.css": "./dist/reset-tailwind.css"
   },
   "publishConfig": {
     "access": "public",
@@ -52,6 +57,7 @@
     "@unocss/preset-web-fonts": "^66.0.0",
     "@unocss/preset-wind3": "^66.0.0",
     "@unocss/preset-wind4": "^66.0.0",
+    "@unocss/reset": "^66.0.0",
     "@unocss/transformer-directives": "^66.0.0",
     "@unocss/transformer-variant-group": "^66.0.0",
     "chokidar": "^5.0.0",
@@ -62,7 +68,7 @@
     "unocss-preset-completion": "0.3.1"
   },
   "devDependencies": {
-    "@subf/config": "^0.1.0",
+    "@subf/config": "^0.1.1",
     "@types/node": "^22",
     "@unocss/vite": "^66.0.0",
     "bumpp": "^10",

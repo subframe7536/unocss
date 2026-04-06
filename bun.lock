@@ -13,6 +13,7 @@
         "@unocss/preset-web-fonts": "^66.0.0",
         "@unocss/preset-wind3": "^66.0.0",
         "@unocss/preset-wind4": "^66.0.0",
+        "@unocss/reset": "^66.0.0",
         "@unocss/transformer-directives": "^66.0.0",
         "@unocss/transformer-variant-group": "^66.0.0",
         "chokidar": "^5.0.0",
@@ -23,7 +24,7 @@
         "unocss-preset-completion": "0.3.1",
       },
       "devDependencies": {
-        "@subf/config": "^0.1.0",
+        "@subf/config": "^0.1.1",
         "@types/node": "^22",
         "@unocss/vite": "^66.0.0",
         "bumpp": "^10",
@@ -192,9 +193,9 @@
 
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.0-rc.12", "https://registry.npmmirror.com/@rolldown/pluginutils/-/pluginutils-1.0.0-rc.12.tgz", {}, "sha512-HHMwmarRKvoFsJorqYlFeFRzXZqCt2ETQlEDOb9aqssrnVBB1/+xgTGtuTrIk5vzLNX1MjMtTf7W9z3tsSbrxw=="],
 
-    "@subf/config": ["@subf/config@0.1.0", "https://registry.npmmirror.com/@subf/config/-/config-0.1.0.tgz", { "dependencies": { "@subf/oxlint-plugin": "^0.1.0" }, "bin": { "subf": "bin/subf.js" } }, "sha512-pjJNz6XChDGHPWUJDIt40Pi9PfeoepYKXHt05qkT71+82mSUB2nQyGLiKi36rVRAjULowYPOOQzV8l7qd7kRbQ=="],
+    "@subf/config": ["@subf/config@0.1.1", "https://registry.npmmirror.com/@subf/config/-/config-0.1.1.tgz", { "dependencies": { "@subf/oxlint-plugin": "^0.2.0" }, "bin": { "subf": "bin/subf.js" } }, "sha512-ru5BSpyozeDck/UPpcWQYsEK5xAQO8g9tw67q18Yw/b2oF1JLxoRuVULTG1HU0ReLFOjgo18KqrqKoAoNkedOg=="],
 
-    "@subf/oxlint-plugin": ["@subf/oxlint-plugin@0.1.0", "https://registry.npmmirror.com/@subf/oxlint-plugin/-/oxlint-plugin-0.1.0.tgz", {}, "sha512-w46Of5HTYA9+Z1fWsdOvOoBhYVSRJOyWp7UFm3F/8zyufNTfaAQgpA8FHTD+AYAuIYLaEPT7k2aGmjy2U0R45A=="],
+    "@subf/oxlint-plugin": ["@subf/oxlint-plugin@0.2.0", "https://registry.npmmirror.com/@subf/oxlint-plugin/-/oxlint-plugin-0.2.0.tgz", {}, "sha512-h4wHNd32bi3BBVg4Y5U9DaeLuxZbO3b/lSSK31279OfS0AdTeo1z2AamqZ1US7AsN8XlOFh0xY6JaTQGWeKIHQ=="],
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "https://registry.npmmirror.com/@tybys/wasm-util/-/wasm-util-0.10.1.tgz", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
 
@@ -221,6 +222,8 @@
     "@unocss/preset-wind3": ["@unocss/preset-wind3@66.6.7", "https://registry.npmmirror.com/@unocss/preset-wind3/-/preset-wind3-66.6.7.tgz", { "dependencies": { "@unocss/core": "66.6.7", "@unocss/preset-mini": "66.6.7", "@unocss/rule-utils": "66.6.7" } }, "sha512-PKyqeRzlIMd3Irdt6fCKMm73zgwweiXESk5edUK8dVWndvPIcZCOqrEq7yg6Pr/Q8tHdq26viYSkVY3a3t8RSg=="],
 
     "@unocss/preset-wind4": ["@unocss/preset-wind4@66.6.7", "https://registry.npmmirror.com/@unocss/preset-wind4/-/preset-wind4-66.6.7.tgz", { "dependencies": { "@unocss/core": "66.6.7", "@unocss/extractor-arbitrary-variants": "66.6.7", "@unocss/rule-utils": "66.6.7" } }, "sha512-9grhWeBsFzpv8iER9AFATRaxLyXMCwGQ5HzeI4XZh2ZZ9O6vC7nYfGhns4/I+F/RpFglzU1bjqMWRS/DS8OpGQ=="],
+
+    "@unocss/reset": ["@unocss/reset@66.6.7", "https://registry.npmmirror.com/@unocss/reset/-/reset-66.6.7.tgz", {}, "sha512-+OjpLDEaPmhTQ3Gj7EaKApNM92TM9f9gLgHNa79+66wIll9IfhKfEmJXnF9y1SE725n4PmPIQgC9k313HztMLA=="],
 
     "@unocss/rule-utils": ["@unocss/rule-utils@66.6.7", "https://registry.npmmirror.com/@unocss/rule-utils/-/rule-utils-66.6.7.tgz", { "dependencies": { "@unocss/core": "^66.6.7", "magic-string": "^0.30.21" } }, "sha512-4PT/s8yKIShSqP9XPSw4EjbZopcu3wlIB9i3kbGbzQwF91H+0Yy10guK3kHDGtkmWVN6Np6VvaGIj2UcbmaivA=="],
 
