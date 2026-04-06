@@ -1,11 +1,16 @@
-import { defineRule } from '@oxlint/plugins'
-import type { Context, ESTree } from '@oxlint/plugins'
+import type { ESTree, Range, Rule } from '@oxlint/plugins'
 
-import { AST_NODES_WITH_QUOTES, CLASS_FIELDS } from '../constants'
+import {
+  isPossibleLiteral,
+  isSimpleTemplateLiteral,
+  isStringRaw,
+  sortClasses,
+  CLASS_FIELDS,
+  UNO_FUNCTIONS,
+  UNO_VARIABLES,
+} from './_'
 
-import { syncAction } from './_'
-
-export default defineRule({
+const rule: Rule = {
   meta: {
     type: 'layout',
     fixable: 'code',
@@ -34,36 +39,30 @@ export default defineRule({
     ],
     defaultOptions: [
       {
-        unoFunctions: ['clsx', 'classnames'],
-        unoVariables: ['^cls', 'classNames?$'],
+        unoFunctions: UNO_FUNCTIONS,
+        unoVariables: UNO_VARIABLES,
       },
     ],
   },
-  createOnce(context: Context) {
-    const [opts = {}] = context.options as [{ unoFunctions?: string[]; unoVariables?: string[] }?]
-    const { unoFunctions = ['clsx', 'classnames'], unoVariables = ['^cls', 'classNames?$'] } = opts
+  createOnce(context) {
+    const [opts = {}] = (context.options || []) as [
+      { unoFunctions?: string[]; unoVariables?: string[] }?,
+    ]
+    const { unoFunctions = UNO_FUNCTIONS, unoVariables = UNO_VARIABLES } = opts
 
     const lowerFunctions = new Set(unoFunctions.map((name: string) => name.toLowerCase()))
-    function isUnoFunction(name: string) {
-      return lowerFunctions.has(name.toLowerCase())
-    }
 
     const unoVariablesRegexes = unoVariables.map((regex: string) => new RegExp(regex, 'i'))
     function isUnoVariable(name: string) {
-      return unoVariablesRegexes.some((reg: RegExp) => reg.test(name))
+      return unoVariablesRegexes.some((reg) => reg.test(name))
     }
 
-    function checkLiteral(node: any, addSpace?: 'before' | 'after') {
+    function checkLiteral(node: ESTree.StringLiteral, addSpace?: 'before' | 'after') {
       if (typeof node.value !== 'string' || !node.value.trim()) {
         return
       }
       const input = node.value
-      let sorted = syncAction(
-        (context as any).settings?.unocss?.configPath,
-        'sort',
-        input,
-        context.filename,
-      ).trim()
+      let sorted = sortClasses(context, input, context.filename).trim()
 
       if (addSpace === 'before') {
         sorted = ` ${sorted}`
@@ -76,14 +75,14 @@ export default defineRule({
           node,
           loc: node.loc,
           messageId: 'invalid-order',
-          fix(fixer: any) {
-            if (AST_NODES_WITH_QUOTES.includes(node.type)) {
+          fix(fixer) {
+            if (node.type === 'Literal') {
               return fixer.replaceTextRange([node.range[0] + 1, node.range[1] - 1], sorted)
             } else {
               return fixer.replaceText(node, sorted)
             }
           },
-        } as any)
+        })
       }
     }
 
@@ -112,12 +111,7 @@ export default defineRule({
         return
       }
 
-      let sorted = syncAction(
-        (context as any).settings?.unocss?.configPath,
-        'sort',
-        input,
-        context.filename,
-      ).trim()
+      let sorted = sortClasses(context, input, context.filename).trim()
       if (/^\s/.test(input)) {
         sorted = ` ${sorted}`
       }
@@ -130,24 +124,17 @@ export default defineRule({
           node: quasi,
           loc: quasi.loc,
           messageId: 'invalid-order',
-          fix(fixer: any) {
-            const realRange = getRange()
+          fix(fixer) {
+            const realRange = getRange() as Range
             if (!realRange) {
               return null
             }
             return fixer.replaceTextRange(realRange, sorted)
           },
-        } as any)
+        })
       }
     }
 
-    function isPossibleLiteral(node: any) {
-      return (
-        node.type === 'Literal' ||
-        node.type === 'TemplateLiteral' ||
-        node.type === 'TaggedTemplateExpression'
-      )
-    }
     function checkPossibleLiteral(...nodes: ESTree.Node[]) {
       nodes.forEach((node) => {
         if (!isPossibleLiteral(node)) {
@@ -158,22 +145,10 @@ export default defineRule({
           return checkLiteral(node)
         }
 
-        const isSimpleTemplateLiteral = (node: ESTree.TemplateLiteral) => {
-          return node.expressions.length === 0 && node.quasis.length === 1
-        }
         if (node.type === 'TemplateLiteral' && isSimpleTemplateLiteral(node)) {
           return checkTemplateElement(node.quasis[0]!)
         }
 
-        const isStringRaw = (tag: any) => {
-          return (
-            tag.type === 'MemberExpression' &&
-            tag.object.type === 'Identifier' &&
-            tag.object.name === 'String' &&
-            tag.property.type === 'Identifier' &&
-            tag.property.name === 'raw'
-          )
-        }
         if (
           node.type === 'TaggedTemplateExpression' &&
           isStringRaw(node.tag) &&
@@ -213,7 +188,10 @@ export default defineRule({
       },
 
       CallExpression(node) {
-        if (!(node.callee.type === 'Identifier' && isUnoFunction(node.callee.name))) {
+        if (
+          node.callee.type !== 'Identifier' ||
+          !lowerFunctions.has(node.callee.name.toLowerCase())
+        ) {
           return
         }
 
@@ -230,8 +208,8 @@ export default defineRule({
             return checkPossibleLiteral(arg.left, arg.right)
           }
 
-          function handleObjectExpression(node: any) {
-            node.properties.forEach((p: any) => {
+          function handleObjectExpression(node: ESTree.ObjectExpression) {
+            node.properties.forEach((p) => {
               if (p.type !== 'Property') {
                 return
               }
@@ -293,6 +271,7 @@ export default defineRule({
             }
           })
         }
+
         if (node.init.type === 'ObjectExpression') {
           return handleObjectExpression(node.init)
         }
@@ -305,4 +284,6 @@ export default defineRule({
       },
     }
   },
-})
+}
+
+export default rule

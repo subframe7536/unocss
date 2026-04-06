@@ -48,6 +48,9 @@ export default defineConfig([
     },
     format: 'esm',
     dts: true,
+    deps: {
+      onlyBundle: false,
+    },
     exports: true,
   },
   // Worker entry (always ESM, separate bundle, internal use)

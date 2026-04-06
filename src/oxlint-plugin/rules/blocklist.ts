@@ -1,11 +1,8 @@
-import { defineRule } from '@oxlint/plugins'
-import type { Context } from '@oxlint/plugins'
+import type { Rule } from '@oxlint/plugins'
 
-import { CLASS_FIELDS } from '../constants'
+import { blocklistClasses, CLASS_FIELDS } from './_'
 
-import { syncAction } from './_'
-
-export default defineRule({
+const rule: Rule = {
   meta: {
     type: 'problem',
     fixable: 'code',
@@ -19,40 +16,38 @@ export default defineRule({
     schema: [],
     defaultOptions: [],
   },
-  createOnce(context: Context) {
-    const checkLiteral = (node: any) => {
-      if (typeof node.value !== 'string' || !node.value.trim()) {
-        return
-      }
-      const input = node.value
-
-      const blocked = syncAction(
-        (context as any).settings?.unocss?.configPath,
-        'blocklist',
-        input,
-        context.filename,
-      )
-      blocked.forEach(([name, meta]: [string, any]) => {
-        context.report({
-          node,
-          messageId: 'in-blocklist',
-          data: { name, reason: meta?.message ? `: ${meta.message}` : '' },
-        } as any)
-      })
-    }
-
+  createOnce(context) {
     return {
       JSXAttribute(node) {
         if (
-          typeof node.name.name === 'string' &&
-          CLASS_FIELDS.includes(node.name.name.toLowerCase()) &&
-          node.value
+          typeof node.name.name !== 'string' ||
+          !CLASS_FIELDS.includes(node.name.name.toLowerCase()) ||
+          !node.value
         ) {
-          if (node.value.type === 'Literal') {
-            checkLiteral(node.value)
+          return
+        }
+
+        if (node.value?.type === 'Literal') {
+          const literalNode = node.value
+          if (typeof literalNode.value !== 'string' || !literalNode.value.trim()) {
+            return
+          }
+
+          for (const [name, meta] of blocklistClasses(
+            context,
+            literalNode.value,
+            context.filename,
+          )) {
+            context.report({
+              node,
+              messageId: 'in-blocklist',
+              data: { name, reason: meta?.message ? `: ${meta.message}` : '' },
+            })
           }
         }
       },
     }
   },
-})
+}
+
+export default rule

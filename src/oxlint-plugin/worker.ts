@@ -23,10 +23,10 @@ function getSearchCwd(id: string): string {
   return dirname(id)
 }
 
-async function _getGenerator(configPath?: string, id?: string) {
-  const searchFrom = configPath ? process.cwd() : id ? getSearchCwd(id) : process.cwd()
+async function _getGenerator(id?: string) {
+  const searchFrom = id ? getSearchCwd(id) : process.cwd()
 
-  const { config, sources } = await loadConfig(searchFrom, configPath)
+  const { config, sources } = await loadConfig(searchFrom)
   if (!sources.length) {
     throw new Error(
       '[@subf/unocss] No config file found, create a `uno.config.ts` file in your project root and try again.',
@@ -52,25 +52,22 @@ export async function getGenerator(configPath?: string, id?: string) {
   const cacheKey = getCacheKey(configPath, id)
   let promise = promises.get(cacheKey)
   if (!promise) {
-    promise = _getGenerator(configPath, id)
+    promise = _getGenerator(id)
     promises.set(cacheKey, promise)
   }
   return await promise
-}
-
-export function setGenerator(
-  generator: Awaited<UnoGenerator<any>>,
-  configPath?: string | undefined,
-) {
-  const cacheKey = configPath ? `config:${configPath}` : `cwd:${process.cwd()}`
-  promises.set(cacheKey, Promise.resolve(generator))
 }
 
 /**
  * Sorts UnoCSS utility classes by their variant order and name.
  * Inlined from @unocss/virtual-shared/integration/sort-rules.
  */
-async function sortRules(rules: string, uno: UnoGenerator<any>): Promise<string> {
+async function actionSort(
+  configPath: string | undefined,
+  rules: string,
+  id?: string,
+): Promise<string> {
+  const uno = await getGenerator(configPath, id)
   const unknown: string[] = []
 
   if (!uno.config.details) {
@@ -110,10 +107,6 @@ async function sortRules(rules: string, uno: UnoGenerator<any>): Promise<string>
   }
 
   return [...unknown, sorted].join(' ').trim()
-}
-
-async function actionSort(configPath: string | undefined, classes: string, id?: string) {
-  return await sortRules(classes, await getGenerator(configPath, id))
 }
 
 async function actionBlocklist(
@@ -164,48 +157,27 @@ async function actionBlocklist(
   return [...blocked]
 }
 
-export function runAsync(
-  configPath: string | undefined,
-  action: 'sort',
-  classes: string,
-  id?: string,
-): Promise<string>
-export function runAsync(
-  configPath: string | undefined,
-  action: 'blocklist',
-  classes: string,
-  id?: string,
-): Promise<[string, BlocklistMeta | undefined][]>
-export async function runAsync(
-  configPath: string | undefined,
-  action: string,
-  ...args: any[]
-): Promise<any> {
-  switch (action) {
-    case 'sort':
-      // @ts-expect-error cast
-      return actionSort(configPath, ...args)
-    case 'blocklist':
-      // @ts-expect-error cast
-      return actionBlocklist(configPath, ...args)
-  }
-}
-
 export function run(
-  configPath: string | undefined,
   action: 'sort',
+  configPath: string | undefined,
   classes: string,
   id?: string,
 ): string
 export function run(
-  configPath: string | undefined,
   action: 'blocklist',
+  configPath: string | undefined,
   classes: string,
   id?: string,
 ): [string, BlocklistMeta | undefined][]
-export function run(configPath: string | undefined, action: string, ...args: any[]): any {
-  // @ts-expect-error cast
-  return runAsync(configPath, action, ...args)
+export function run(action: string, ...args: any[]): any {
+  switch (action) {
+    case 'sort':
+      // @ts-expect-error cast
+      return actionSort(...args)
+    case 'blocklist':
+      // @ts-expect-error cast
+      return actionBlocklist(...args)
+  }
 }
 
-runAsWorker(run as any)
+runAsWorker(run)
