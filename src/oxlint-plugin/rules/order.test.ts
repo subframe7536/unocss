@@ -61,3 +61,53 @@ tester.run('order-jsx', rule, {
     },
   ],
 })
+
+tester.run('order-options', rule, {
+  valid: [`clsx('m1 mx1 mr-1')`, `const cls = 'm1 mx1 mr-1'`],
+  invalid: [
+    {
+      code: `clsx('mx1 m1 mr-1')`,
+      output: `clsx('m1 mx1 mr-1')`,
+      errors: [
+        {
+          messageId: 'invalid-order',
+        },
+      ],
+    },
+    {
+      code: `const cls = 'mx1 m1 mr-1'`,
+      output: `const cls = 'm1 mx1 mr-1'`,
+      errors: [
+        {
+          messageId: 'invalid-order',
+        },
+      ],
+    },
+  ],
+})
+
+tester.run('order-options-custom', rule, {
+  valid: [`myFn('m1 mx1 mr-1')`, `const myCls = 'm1 mx1 mr-1'`],
+  invalid: [
+    {
+      code: `myFn('mx1 m1 mr-1')`,
+      output: `myFn('m1 mx1 mr-1')`,
+      options: [{ unoFunctions: ['myFn'] }],
+      errors: [
+        {
+          messageId: 'invalid-order',
+        },
+      ],
+    },
+    {
+      code: `const myCls = 'mx1 m1 mr-1'`,
+      output: `const myCls = 'm1 mx1 mr-1'`,
+      options: [{ unoVariables: ['^myCls'] }],
+      errors: [
+        {
+          messageId: 'invalid-order',
+        },
+      ],
+    },
+  ],
+})

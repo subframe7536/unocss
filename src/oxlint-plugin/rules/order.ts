@@ -45,14 +45,9 @@ const rule: Rule = {
     ],
   },
   createOnce(context) {
-    const [opts = {}] = (context.options || []) as [
-      { unoFunctions?: string[]; unoVariables?: string[] }?,
-    ]
-    const { unoFunctions = UNO_FUNCTIONS, unoVariables = UNO_VARIABLES } = opts
+    let lowerFunctions: Set<string>
+    let unoVariablesRegexes: RegExp[]
 
-    const lowerFunctions = new Set(unoFunctions.map((name: string) => name.toLowerCase()))
-
-    const unoVariablesRegexes = unoVariables.map((regex: string) => new RegExp(regex, 'i'))
     function isUnoVariable(name: string) {
       return unoVariablesRegexes.some((reg) => reg.test(name))
     }
@@ -170,6 +165,15 @@ const rule: Rule = {
     }
 
     return {
+      before() {
+        const [opts = {}] = (context.options || []) as [
+          { unoFunctions?: string[]; unoVariables?: string[] }?,
+        ]
+        const { unoFunctions = UNO_FUNCTIONS, unoVariables = UNO_VARIABLES } = opts
+
+        lowerFunctions = new Set(unoFunctions.map((name: string) => name.toLowerCase()))
+        unoVariablesRegexes = unoVariables.map((regex: string) => new RegExp(regex, 'i'))
+      },
       JSXAttribute(node) {
         if (
           typeof node.name.name === 'string' &&

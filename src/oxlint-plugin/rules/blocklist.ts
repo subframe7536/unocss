@@ -13,8 +13,6 @@ const rule: Rule = {
     messages: {
       'in-blocklist': '"{{name}}" is in blocklist{{reason}}',
     },
-    schema: [],
-    defaultOptions: [],
   },
   createOnce(context) {
     return {
