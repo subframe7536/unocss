@@ -51,9 +51,9 @@ export default defineConfig({
 
 The Vite plugin is a drop-in replacement for `@unocss/vite` with the following changes:
 
-- Inspector permanently disabled
-- `vue` and `svelte` files excluded from the default pipeline (use `@unocss/vite` directly if you need those)
-- `@unocss-skip-start` / `@unocss-skip-end` range comments **removed** — use `@unocss-ignore` at the top of a file to skip it entirely
+- Remove inspector
+- Remove `VueScopePlugin`
+- Remove `@unocss-skip-start` / `@unocss-skip-end` range comments support
 
 ```ts
 // vite.config.ts
