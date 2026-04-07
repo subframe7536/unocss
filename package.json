@@ -86,6 +86,7 @@
     "@unocss/inspector": "npm:has-flag"
   },
   "inlinedDependencies": {
+    "@oxlint/plugins": "1.59.0",
     "@unocss/vite": "66.6.7"
   }
 }
