@@ -86,31 +86,47 @@ export const patchVitePlugin: Plugin = {
         // Remove SKIP_COMMENT_RE usages in extractor calls: code.replace(SKIP_COMMENT_RE, "") → code
         .replace(/code\.replace\(SKIP_COMMENT_RE, ""\)/g, 'code')
         // Remove transformSkipCode and restoreSkipCode helper function definitions
+        // Use whitespace-agnostic patterns (avoid literal \t) for future-safety
         .replace(
-          /function transformSkipCode\(code, map, SKIP_RULES_RE, keyFlag\) \{[\s\S]*?\treturn code;\n\}\nfunction restoreSkipCode\(code, map\) \{[\s\S]*?\treturn code;\n\}\n/,
+          /function transformSkipCode\([^)]*\) \{[\s\S]*?return code;\n\}\nfunction restoreSkipCode\([^)]*\) \{[\s\S]*?return code;\n\}\n/,
           '',
         )
-        // Simplify applyTransformers: remove skipMap/transformSkipCode/restoreSkipCode/maps/remapping
-        // Step 1: replace the initialization block (skipMap + transformSkipCode call + maps array)
+        // Replace the entire applyTransformers function:
+        //   - Remove skipMap / transformSkipCode / restoreSkipCode / remapping usage
+        //   - Keep per-transformer source map generation; return the last produced map
+        // The function's closing `}` is the first unindented `}` after the opening.
         .replace(
-          /\tconst skipMap = \/\* @__PURE__ \*\/ new Map\(\);\n\tlet code = original;\n\tlet s = new MagicString\(transformSkipCode\(code, skipMap, SKIP_COMMENT_RE, "@unocss-skip-placeholder-"\)\);\n\tconst maps = \[\];\n/,
-          '\tlet code = original;\n\tlet s = new MagicString(code);\n',
-        )
-        // Step 2: replace restoreSkipCode call with simple toString
-        .replace(/code = restoreSkipCode\(s\.toString\(\), skipMap\)/g, 'code = s.toString()')
-        // Step 3: remove maps.push(s.generateMap(...)) block
-        .replace(/\t\t\tmaps\.push\(s\.generateMap\(\{\n\t\t\t\thires: true,\n\t\t\t\tsource: id\n\t\t\t\}\)\);\n/g, '')
-        // Step 4: replace the return with remapping(...) with a simple { code } return
-        .replace(
-          /\tif \(code !== original\) return \{\n\t\tcode,\n\t\tmap: remapping\(maps, \(_, ctx\) => \{\n\t\t\tctx\.content = code;\n\t\t\treturn null;\n\t\t\}\)\n\t\};\n\}/,
-          '\tif (code !== original) return { code };\n}',
+          /async function applyTransformers\(ctx, original, id, enforce = "default"\) \{[\s\S]*?\n\}/,
+          [
+            'async function applyTransformers(ctx, original, id, enforce = "default") {',
+            '\tif (original.includes("@unocss-ignore")) return;',
+            '\tconst transformers = (ctx.uno.config.transformers || []).filter((i) => (i.enforce || "default") === enforce);',
+            '\tif (!transformers.length) return;',
+            '\tlet code = original;',
+            '\tlet s = new MagicString(code);',
+            '\tlet map = null;',
+            '\tfor (const t of transformers) {',
+            '\t\tif (t.idFilter) {',
+            '\t\t\tif (!t.idFilter(id)) continue;',
+            '\t\t} else if (!ctx.filter(code, id)) continue;',
+            '\t\tawait t.transform(s, id, ctx);',
+            '\t\tif (s.hasChanged()) {',
+            '\t\t\tcode = s.toString();',
+            '\t\t\tmap = s.generateMap({ hires: true, source: id });',
+            '\t\t\ts = new MagicString(code);',
+            '\t\t}',
+            '\t}',
+            '\tif (code !== original) return { code, map };',
+            '}',
+          ].join('\n'),
         )
         // Change createTransformerPlugins transform hook from function-style to object-style
-        // with a code filter so Rolldown can skip @unocss-ignore files at the native level
+        // with a code filter so Rolldown can skip @unocss-ignore files at the native level.
+        // Use \s* instead of literal \t for whitespace to be whitespace-agnostic.
         .replace(
-          /\t\t\ttransform\(code, id\) \{\n\t\t\t\treturn applyTransformers\(ctx, code, id, order\);\n\t\t\t\},/,
+          /transform\(code, id\) \{\s*return applyTransformers\(ctx, code, id, order\);\s*\},/,
           [
-            '\t\t\ttransform: {',
+            'transform: {',
             "\t\t\t\tfilter: { code: { exclude: '@unocss-ignore' } },",
             '\t\t\t\thandler(code, id) {',
             '\t\t\t\t\treturn applyTransformers(ctx, code, id, order);',
