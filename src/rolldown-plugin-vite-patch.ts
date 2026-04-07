@@ -18,11 +18,14 @@ export const patchVitePlugin: Plugin = {
         )
         // Remove the inspector default import
         .replace(/import UnocssInspector from ['"]@unocss\/inspector['"];?[\r\n]*/g, '')
+        // Remove the @jridgewell/remapping import (no longer needed after applyTransformers optimization)
+        .replace(/import remapping from ['"]@jridgewell\/remapping['"];[\r\n]*/g, '')
         // Remove the runtime push: if (inlineConfig.inspector !== false) plugins.push(UnocssInspector(ctx));
         .replace(
           /if\s*\(inlineConfig\.inspector\s*!==\s*false\)\s*plugins\.push\(UnocssInspector\(ctx\)\);?[\r\n]*/g,
           '',
-        ) // Remove Vue files from the default pipeline include to avoid Vue/Svelte-specific handling
+        )
+        // Remove Vue files from the default pipeline include to avoid Vue/Svelte-specific handling
         .replace(
           /const defaultPipelineInclude = \[[\s\S]*?\];/g,
           'const defaultPipelineInclude = [/\\.([jt]sx|vine.ts|mdx?|astro|elm|php|phtml|marko|html)($|\\?)/];',
@@ -74,6 +77,46 @@ export const patchVitePlugin: Plugin = {
         .replace(
           /tasks\.push\(setupContentExtractor\(ctx, viteConfig\.mode !== "test" && viteConfig\.command === "serve"\)\);/g,
           'tasks.push(setupContentExtractor(ctx, viteConfig.mode !== "test" && viteConfig.command === "serve", viteConfig._viteWatcher));',
+        )
+        // Remove @unocss-skip range support: remove SKIP_START_COMMENT, SKIP_END_COMMENT, SKIP_COMMENT_RE constants
+        .replace(
+          /const SKIP_START_COMMENT = "@unocss-skip-start";\nconst SKIP_END_COMMENT = "@unocss-skip-end";\nconst SKIP_COMMENT_RE = new RegExp\(`[^`]*`, "g"\);\n/g,
+          '',
+        )
+        // Remove SKIP_COMMENT_RE usages in extractor calls: code.replace(SKIP_COMMENT_RE, "") → code
+        .replace(/code\.replace\(SKIP_COMMENT_RE, ""\)/g, 'code')
+        // Remove transformSkipCode and restoreSkipCode helper function definitions
+        .replace(
+          /function transformSkipCode\(code, map, SKIP_RULES_RE, keyFlag\) \{[\s\S]*?\treturn code;\n\}\nfunction restoreSkipCode\(code, map\) \{[\s\S]*?\treturn code;\n\}\n/,
+          '',
+        )
+        // Simplify applyTransformers: remove skipMap/transformSkipCode/restoreSkipCode/maps/remapping
+        // Step 1: replace the initialization block (skipMap + transformSkipCode call + maps array)
+        .replace(
+          /\tconst skipMap = \/\* @__PURE__ \*\/ new Map\(\);\n\tlet code = original;\n\tlet s = new MagicString\(transformSkipCode\(code, skipMap, SKIP_COMMENT_RE, "@unocss-skip-placeholder-"\)\);\n\tconst maps = \[\];\n/,
+          '\tlet code = original;\n\tlet s = new MagicString(code);\n',
+        )
+        // Step 2: replace restoreSkipCode call with simple toString
+        .replace(/code = restoreSkipCode\(s\.toString\(\), skipMap\)/g, 'code = s.toString()')
+        // Step 3: remove maps.push(s.generateMap(...)) block
+        .replace(/\t\t\tmaps\.push\(s\.generateMap\(\{\n\t\t\t\thires: true,\n\t\t\t\tsource: id\n\t\t\t\}\)\);\n/g, '')
+        // Step 4: replace the return with remapping(...) with a simple { code } return
+        .replace(
+          /\tif \(code !== original\) return \{\n\t\tcode,\n\t\tmap: remapping\(maps, \(_, ctx\) => \{\n\t\t\tctx\.content = code;\n\t\t\treturn null;\n\t\t\}\)\n\t\};\n\}/,
+          '\tif (code !== original) return { code };\n}',
+        )
+        // Change createTransformerPlugins transform hook from function-style to object-style
+        // with a code filter so Rolldown can skip @unocss-ignore files at the native level
+        .replace(
+          /\t\t\ttransform\(code, id\) \{\n\t\t\t\treturn applyTransformers\(ctx, code, id, order\);\n\t\t\t\},/,
+          [
+            '\t\t\ttransform: {',
+            "\t\t\t\tfilter: { code: { exclude: '@unocss-ignore' } },",
+            '\t\t\t\thandler(code, id) {',
+            '\t\t\t\t\treturn applyTransformers(ctx, code, id, order);',
+            '\t\t\t\t}',
+            '\t\t\t},',
+          ].join('\n'),
         )
       return {
         code: targetCode,

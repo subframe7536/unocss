@@ -51,7 +51,6 @@
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
-    "@jridgewell/remapping": "^2.3.5",
     "@unocss/config": "^66.0.0",
     "@unocss/core": "^66.0.0",
     "@unocss/preset-icons": "^66.0.0",
