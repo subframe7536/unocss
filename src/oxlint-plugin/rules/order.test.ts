@@ -62,7 +62,7 @@ tester.run('order-jsx', rule, {
   ],
 })
 
-tester.run('order-options', rule, {
+tester.run('order-options-default', rule, {
   valid: [`clsx('m1 mx1 mr-1')`, `const cls = 'm1 mx1 mr-1'`],
   invalid: [
     {
