@@ -15,6 +15,7 @@ If you are using `vue` or `svelte`, you should use `unocss` directly.
 | `@unocss/preset-web-fonts`          | Web fonts support                                  |
 | `@unocss/transformer-variant-group` | Variant group transformer                          |
 | `@unocss/transformer-directives`    | `@apply` directive transformer                     |
+| `@unocss/transformer-compile-class` | Compile class transformer                          |
 | `@unocss/reset`                     | CSS reset styles with `reset-*`, no sanitize entry |
 | `unocss-preset-completion`          | Auto completion support for UnoCSS classes         |
 | `@subf/unocss/vite`                 | Vite plugin, remove inspector                      |
@@ -37,13 +38,14 @@ import {
   presetIcons,
   presetWebFonts,
   presetWind4,
+  transformerCompileClass,
   transformerDirectives,
   transformerVariantGroup,
 } from '@subf/unocss'
 
 export default defineConfig({
   presets: [presetWind4(), presetIcons(), presetWebFonts(), presetCompletion()],
-  transformers: [transformerVariantGroup(), transformerDirectives()],
+  transformers: [transformerVariantGroup(), transformerDirectives(), transformerCompileClass()],
 })
 ```
 

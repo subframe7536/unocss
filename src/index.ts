@@ -14,6 +14,7 @@ export type { Theme as PresetWind3Theme } from '@unocss/preset-wind3'
 export type { Theme as PresetWind4Theme } from '@unocss/preset-wind4'
 export { default as transformerDirectives } from '@unocss/transformer-directives'
 export { default as transformerVariantGroup } from '@unocss/transformer-variant-group'
+export { default as transformerCompileClass } from '@unocss/transformer-compile-class'
 
 export function presetCompletion(): Preset {
   return {
