@@ -52,6 +52,9 @@ export default defineConfig([
       'process.env.NODE_ENV': JSON.stringify('production'),
     },
     exports: true,
+    deps: {
+      neverBundle: ['@oxlint/plugins'],
+    },
   },
   // Worker entry (always ESM, separate bundle, internal use)
   {

@@ -1,6 +1,23 @@
 {
-  "extends": "@subf/config/tsconfig-lib",
   "compilerOptions": {
-    "allowImportingTsExtensions": true
+    "target": "ES2023",
+    "module": "esnext",
+    "moduleResolution": "Bundler",
+    "moduleDetection": "force",
+    "strict": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noImplicitOverride": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "lib": [
+      "ES2023"
+    ],
+    "noUncheckedIndexedAccess": true
   }
 }
