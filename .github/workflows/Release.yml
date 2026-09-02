@@ -23,6 +23,6 @@ jobs:
 
       - run: nub ci
       - run: nub publish --provenance --no-git-checks
-      - run: bunx changelogithub
+      - run: nubx changelogithub
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
