@@ -17,12 +17,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: nubjs/setup-nub@v0
+      - uses: actions/checkout@v7
+      - uses: pnpm/setup@v3
         with:
-          nub-version: 0.7.5
-
-      - run: nub ci
-      - run: nub publish --provenance --no-git-checks
-      - run: nubx changelogithub
+          runtime: node@24
+      - run: pnpm publish --provenance --no-git-checks
+      - run: pnpx changelogithub
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

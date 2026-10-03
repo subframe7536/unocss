@@ -37,7 +37,7 @@ export default defineConfig([
     dts: true,
     exports: true,
     deps: {
-      onlyBundle: false,
+      neverBundle: ['chokidar'],
     },
     plugins: [patchVitePlugin],
   },
