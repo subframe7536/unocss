@@ -77,12 +77,16 @@ async function actionSort(
   const variantGroup = uno.config.transformers?.find(
     (transformer) => transformer.name === '@unocss/transformer-variant-group',
   )
-  // The transformer captures separators in its closure and exposes them through codeFilter.
-  const separators = [':', '-'].filter(
-    (separator) => variantGroup?.codeFilter?.(`${separator}(`, id || '') ?? true,
-  )
-  const expandedResult = parseVariantGroup(rules, separators)
-  rules = expandedResult.expanded
+
+  let expandedResult: ReturnType<typeof parseVariantGroup> | undefined
+  if (variantGroup) {
+    // The transformer captures separators in its closure and exposes them through codeFilter.
+    const separators = [':', '-'].filter(
+      (separator) => variantGroup?.codeFilter?.(`${separator}(`, id || '') ?? true,
+    )
+    expandedResult = parseVariantGroup(rules, separators)
+    rules = expandedResult.expanded
+  }
 
   const result: Array<[number, string] | undefined> = []
   // Keep groups excluded by the transformer intact instead of sorting their inner tokens.

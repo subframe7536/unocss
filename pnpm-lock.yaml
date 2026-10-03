@@ -166,6 +166,9 @@ importers:
 
   .:
     dependencies:
+      '@jridgewell/remapping':
+        specifier: '*'
+        version: 2.3.5
       '@unocss/config':
         specifier: ^66.10.5
         version: 66.10.5
@@ -216,8 +219,8 @@ importers:
         specifier: ^1.86.0
         version: 1.86.0
       '@subf/config':
-        specifier: ^0.4.0
-        version: 0.4.0(defu@6.1.7)(oxfmt@0.71.0)(oxlint@1.86.0)
+        specifier: ^0.5.0
+        version: 0.5.0(defu@6.1.7)(oxfmt@0.71.0)(oxlint@1.86.0)
       '@types/node':
         specifier: ^24.19.0
         version: 24.19.1
@@ -627,11 +630,11 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@subf/config@0.4.0':
-    resolution: {integrity: sha512-Ql91bi7ydXvrC6WaEJR9v+c0WKEEhBSrKPZ6U4OAQsyDSp+WA5K2ZKo0GLARih7QK/NNdCOIpeLf8xPkRLI//A==}
+  '@subf/config@0.5.0':
+    resolution: {integrity: sha512-GBk01mfu7BmakMgTlAm2zAX4ilOFX3Br0QdYO6wAxDVjaY1uGhcVpHXxRcHhKh+gry89yPASqqrBB7zGdAtk7Q==}
     hasBin: true
     peerDependencies:
-      defu: 6.1.7
+      defu: ^6.1.7
       oxfmt: ^0
       oxlint: ^1
 
@@ -1606,7 +1609,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@subf/config@0.4.0(defu@6.1.7)(oxfmt@0.71.0)(oxlint@1.86.0)':
+  '@subf/config@0.5.0(defu@6.1.7)(oxfmt@0.71.0)(oxlint@1.86.0)':
     dependencies:
       '@subf/oxlint-plugin': 0.3.0
       defu: 6.1.7

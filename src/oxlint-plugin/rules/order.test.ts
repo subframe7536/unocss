@@ -174,12 +174,23 @@ tester.run('order-configPath', rule, {
 for (const { name, configPath, valid, invalid } of [
   {
     name: 'default',
-    configPath: 'uno.config.ts',
+    configPath: 'src/oxlint-plugin/rules/fixtures/variant-group-default.config.ts',
     valid: ['m-(1 2) hover:(ml-1 mr-1)'],
     invalid: [
       {
         input: 'hover:(mr-1 ml-1) m-(2 1)',
         sorted: 'm-(1 2) hover:(ml-1 mr-1)',
+      },
+    ],
+  },
+  {
+    name: 'unconfigured',
+    configPath: 'uno.config.ts',
+    valid: ['hover:(mr-1 ml-1) m-(2 1)'],
+    invalid: [
+      {
+        input: 'hover:(mr-1 ml-1) m-(2 1) mr-1 ml-1',
+        sorted: 'hover:(mr-1 ml-1) m-(2 1) ml-1 mr-1',
       },
     ],
   },
