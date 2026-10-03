@@ -54,8 +54,12 @@ export default defineConfig({
 The Vite plugin is a drop-in replacement for `@unocss/vite` with the following changes:
 
 - Remove inspector
-- Remove `VueScopePlugin`
-- Remove `@unocss-skip-start` / `@unocss-skip-end` range comments support
+- Remove `VueScopedPlugin`
+- Remove `shadow-dom` mode
+
+The build patch targets the pinned `@unocss/vite@66.10.5` version and fails if required replacements no longer match. It reuses Vite's file watcher and `createFilter`, and adds a native hook filter for `@unocss-ignore`. Upstream transformer caching, filters, batched filesystem extraction, and `@unocss-skip-start` / `@unocss-skip-end` support are preserved.
+
+Two temporary fixes correct transformer source-map composition order and retain the original source content. See the [upstream report draft](docs/upstream-sourcemap.md) for a reproduction and removal criteria.
 
 ```ts
 // vite.config.ts

@@ -28,7 +28,7 @@ export default defineConfig([
     },
   },
   // Vite plugin entry: @unocss/vite is bundled (not external), inspector is stripped.
-  // All of @unocss/vite's sub-deps are in our `dependencies` and thus auto-external.
+  // Runtime dependencies are externalized; source-map composition is bundled.
   {
     entry: {
       vite: 'src/vite.ts',
@@ -37,7 +37,7 @@ export default defineConfig([
     dts: true,
     exports: true,
     deps: {
-      neverBundle: ['chokidar'],
+      neverBundle: ['chokidar', '@jridgewell/remapping'],
     },
     plugins: [patchVitePlugin],
   },
