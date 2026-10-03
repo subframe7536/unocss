@@ -1,4 +1,4 @@
-import type { Rule } from '@oxlint/plugins'
+import type { ESTree, Rule } from '@oxlint/plugins'
 
 import { blocklistClasses, CLASS_FIELDS } from './_.ts'
 
@@ -13,8 +13,24 @@ const rule: Rule = {
     messages: {
       'in-blocklist': '"{{name}}" is in blocklist{{reason}}',
     },
+    schema: [],
+    defaultOptions: [],
   },
   createOnce(context) {
+    function checkLiteral(node: ESTree.StringLiteral) {
+      if (typeof node.value !== 'string' || !node.value.trim()) {
+        return
+      }
+
+      for (const [name, meta] of blocklistClasses(context, node.value, context.filename)) {
+        context.report({
+          node,
+          messageId: 'in-blocklist',
+          data: { name, reason: meta?.message ? `: ${meta.message}` : '' },
+        })
+      }
+    }
+
     return {
       JSXAttribute(node) {
         if (
@@ -25,23 +41,8 @@ const rule: Rule = {
           return
         }
 
-        if (node.value?.type === 'Literal') {
-          const literalNode = node.value
-          if (typeof literalNode.value !== 'string' || !literalNode.value.trim()) {
-            return
-          }
-
-          for (const [name, meta] of blocklistClasses(
-            context,
-            literalNode.value,
-            context.filename,
-          )) {
-            context.report({
-              node,
-              messageId: 'in-blocklist',
-              data: { name, reason: meta?.message ? `: ${meta.message}` : '' },
-            })
-          }
+        if (node.value.type === 'Literal') {
+          checkLiteral(node.value)
         }
       },
     }

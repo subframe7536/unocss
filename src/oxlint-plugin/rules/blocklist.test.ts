@@ -14,8 +14,17 @@ const tester = new RuleTester({
 })
 
 tester.run('blocklist-jsx', rule, {
-  valid: [`<div class="m1 mx1 mr-1"></div>`],
+  valid: [
+    `<div class="m1 mx1 mr-1"></div>`,
+    `<div title="border"></div>`,
+    `<div class></div>`,
+    `<div class=" "></div>`,
+  ],
   invalid: [
+    ...['className', 'classList', 'CLASS'].map((attribute) => ({
+      code: `<div ${attribute}="border"></div>`,
+      errors: [{ messageId: 'in-blocklist', data: { name: 'border', reason: '' } }],
+    })),
     {
       code: `<div class="border"></div>`,
       errors: [
@@ -25,6 +34,8 @@ tester.run('blocklist-jsx', rule, {
             name: 'border',
             reason: '',
           },
+          column: 11,
+          endColumn: 19,
         },
       ],
     },
@@ -66,6 +77,28 @@ tester.run('blocklist-jsx', rule, {
           },
         },
       ],
+    },
+  ],
+})
+
+tester.run('blocklist-configPath', rule, {
+  valid: [
+    {
+      code: `<div class="border"></div>`,
+      settings: {
+        unocss: { configPath: 'src/oxlint-plugin/rules/fixtures/explicit.config.ts' },
+      },
+      filename: '/other-project/src/index.tsx',
+    },
+  ],
+  invalid: [
+    {
+      code: `<div class="forbidden"></div>`,
+      settings: {
+        unocss: { configPath: 'src/oxlint-plugin/rules/fixtures/explicit.config.ts' },
+      },
+      filename: '/other-project/src/index.tsx',
+      errors: [{ messageId: 'in-blocklist', data: { name: 'forbidden', reason: '' } }],
     },
   ],
 })

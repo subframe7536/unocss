@@ -7,7 +7,7 @@ import { createSyncFn } from 'synckit'
 
 export const UNO_FUNCTIONS = ['clsx', 'classnames', 'cn', 'cls', 'cva']
 export const UNO_VARIABLES = ['^cls', 'classNames?$']
-export const CLASS_FIELDS = ['class', 'className', 'classList']
+export const CLASS_FIELDS = ['class', 'classname', 'classlist']
 
 const syncAction = createSyncFn(
   process.env.NODE_ENV === 'production'

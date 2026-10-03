@@ -75,7 +75,7 @@ import 'uno.css'
 
 ### Oxlint Plugin
 
-Oxlint rules for UnoCSS. Currently only includes `order` and `blocklist` rules, more to come in the future.
+Oxlint rules for UnoCSS. The `order` and `blocklist` rules track `@unocss/eslint-plugin@66.10.5` for JavaScript, TypeScript, and JSX. The `order` rule also recognizes `cn`, `cls`, and `cva` by default, and both rules recognize `classList`.
 
 ```ts
 // oxlint.config.ts
@@ -83,12 +83,19 @@ import { defineConfig } from 'oxlint'
 
 export default defineConfig({
   jsPlugins: [{ name: 'unocss', specifier: '@subf/unocss/oxlint-plugin' }],
+  settings: {
+    unocss: { configPath: './uno.config.ts' },
+  },
   rules: {
     'unocss/order': 'error',
-    'unocss/blocklist': ['error', { blocklist: ['!important'] }],
+    'unocss/blocklist': 'error',
   },
 })
 ```
+
+Configure blocked utilities in the UnoCSS configuration's `blocklist` field. The optional `settings.unocss.configPath` resolves relative to the working directory; omit it to discover configuration from each linted file's directory.
+
+The `order` rule respects `transformerVariantGroup({ separators: [':'] })` and other separator selections in your UnoCSS configuration. Groups using disabled separators remain intact. Without a variant-group transformer, sorting supports both `:` and `-` groups.
 
 ## License
 

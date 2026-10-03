@@ -52,18 +52,20 @@ const rule: Rule = {
       return unoVariablesRegexes.some((reg) => reg.test(name))
     }
 
-    function checkLiteral(node: ESTree.StringLiteral, addSpace?: 'before' | 'after') {
+    function unwrapTsExpression(node: ESTree.Expression): ESTree.Expression {
+      let current = node
+      while (current.type === 'TSAsExpression' || current.type === 'TSSatisfiesExpression') {
+        current = current.expression
+      }
+      return current
+    }
+
+    function checkLiteral(node: ESTree.StringLiteral) {
       if (typeof node.value !== 'string' || !node.value.trim()) {
         return
       }
       const input = node.value
-      let sorted = sortClasses(context, input, context.filename).trim()
-
-      if (addSpace === 'before') {
-        sorted = ` ${sorted}`
-      } else if (addSpace === 'after') {
-        sorted += ' '
-      }
+      const sorted = sortClasses(context, input, context.filename).trim()
 
       if (sorted !== input) {
         context.report({
@@ -71,11 +73,7 @@ const rule: Rule = {
           loc: node.loc,
           messageId: 'invalid-order',
           fix(fixer) {
-            if (node.type === 'Literal') {
-              return fixer.replaceTextRange([node.range[0] + 1, node.range[1] - 1], sorted)
-            } else {
-              return fixer.replaceText(node, sorted)
-            }
+            return fixer.replaceTextRange([node.range[0] + 1, node.range[1] - 1], sorted)
           },
         })
       }
@@ -87,8 +85,8 @@ const rule: Rule = {
         return
       }
 
-      const getRange = () => {
-        const text = (context as any).sourceCode.getText(quasi)
+      const getRange = (): Range | undefined => {
+        const text = context.sourceCode.getText(quasi)
         const raw = quasi.value.raw
         if (!text.includes(raw)) {
           return
@@ -99,7 +97,7 @@ const rule: Rule = {
         if (start < quasi.range[0] || end > quasi.range[1]) {
           return
         }
-        return [start, end] as const
+        return [start, end]
       }
       const realRange = getRange()
       if (!realRange) {
@@ -120,7 +118,7 @@ const rule: Rule = {
           loc: quasi.loc,
           messageId: 'invalid-order',
           fix(fixer) {
-            const realRange = getRange() as Range
+            const realRange = getRange()
             if (!realRange) {
               return null
             }
@@ -227,9 +225,7 @@ const rule: Rule = {
               }
             })
 
-            const keys = node.properties
-              .filter((p: any) => p.type === 'Property')
-              .map((p: any) => p.key)
+            const keys = node.properties.filter((p) => p.type === 'Property').map((p) => p.key)
             return checkPossibleLiteral(...keys)
           }
 
@@ -252,12 +248,9 @@ const rule: Rule = {
           return
         }
 
-        if (isPossibleLiteral(node.init)) {
-          return checkPossibleLiteral(node.init)
-        }
-
-        if (node.init.type === 'TSAsExpression' && isPossibleLiteral(node.init.expression)) {
-          return checkPossibleLiteral(node.init.expression)
+        const init = unwrapTsExpression(node.init)
+        if (isPossibleLiteral(init)) {
+          return checkPossibleLiteral(init)
         }
 
         function handleObjectExpression(node: ESTree.ObjectExpression) {
@@ -276,14 +269,8 @@ const rule: Rule = {
           })
         }
 
-        if (node.init.type === 'ObjectExpression') {
-          return handleObjectExpression(node.init)
-        }
-        if (
-          node.init.type === 'TSAsExpression' &&
-          node.init.expression.type === 'ObjectExpression'
-        ) {
-          return handleObjectExpression(node.init.expression)
+        if (init.type === 'ObjectExpression') {
+          return handleObjectExpression(init)
         }
       },
     }

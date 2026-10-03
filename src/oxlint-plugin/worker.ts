@@ -23,10 +23,10 @@ function getSearchCwd(id: string): string {
   return dirname(id)
 }
 
-async function _getGenerator(id?: string) {
-  const searchFrom = id ? getSearchCwd(id) : process.cwd()
+async function _getGenerator(configPath?: string, id?: string) {
+  const searchFrom = configPath ? process.cwd() : id ? getSearchCwd(id) : process.cwd()
 
-  const { config, sources } = await loadConfig(searchFrom)
+  const { config, sources } = await loadConfig(searchFrom, configPath)
   if (!sources.length) {
     throw new Error(
       '[@subf/unocss] No config file found, create a `uno.config.ts` file in your project root and try again.',
@@ -52,7 +52,7 @@ export async function getGenerator(configPath?: string, id?: string) {
   const cacheKey = getCacheKey(configPath, id)
   let promise = promises.get(cacheKey)
   if (!promise) {
-    promise = _getGenerator(id)
+    promise = _getGenerator(configPath, id)
     promises.set(cacheKey, promise)
   }
   return await promise
@@ -60,7 +60,7 @@ export async function getGenerator(configPath?: string, id?: string) {
 
 /**
  * Sorts UnoCSS utility classes by their variant order and name.
- * Inlined from @unocss/virtual-shared/integration/sort-rules.
+ * Based on @unocss/virtual-shared/integration/sort-rules.
  */
 async function actionSort(
   configPath: string | undefined,
@@ -74,11 +74,27 @@ async function actionSort(
     uno.config.details = true
   }
 
-  const expandedResult = parseVariantGroup(rules)
+  const variantGroup = uno.config.transformers?.find(
+    (transformer) => transformer.name === '@unocss/transformer-variant-group',
+  )
+  // The transformer captures separators in its closure and exposes them through codeFilter.
+  const separators = [':', '-'].filter(
+    (separator) => variantGroup?.codeFilter?.(`${separator}(`, id || '') ?? true,
+  )
+  const expandedResult = parseVariantGroup(rules, separators)
   rules = expandedResult.expanded
 
   const result: Array<[number, string] | undefined> = []
-  const arr = rules.split(/\s+/g)
+  // Keep groups excluded by the transformer intact instead of sorting their inner tokens.
+  const groups = [...parseVariantGroup(rules).groupsByOffset].sort(([a], [b]) => a - b)
+  const arr: string[] = []
+  let offset = 0
+  for (const [start, group] of groups) {
+    arr.push(...rules.slice(offset, start).split(/\s+/g), rules.slice(start, start + group.length))
+    offset = start + group.length
+  }
+  arr.push(...rules.slice(offset).split(/\s+/g))
+
   for (const i of arr) {
     if (!i) {
       continue
